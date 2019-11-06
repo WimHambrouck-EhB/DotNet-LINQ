@@ -11,13 +11,13 @@ namespace WE05
 
             var grootsteDrie = numbers.OrderByDescending(x => x).Take(3);
             var som = numbers.Sum();
-            var gem = numbers.Average();
-            var even = numbers.Where(x => x % 2 == 0);
+            var gemiddelde = numbers.Average();
+            var evenGetallen = numbers.Where(x => x % 2 == 0);
 
             Console.WriteLine(string.Join(" ", grootsteDrie));
             Console.WriteLine(som);
-            Console.WriteLine(gem);
-            Console.WriteLine(string.Join(" ", even));
+            Console.WriteLine(gemiddelde);
+            Console.WriteLine(string.Join(" ", evenGetallen));
         }
     }
 }

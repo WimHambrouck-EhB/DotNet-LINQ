@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace WE05_oef3
@@ -85,7 +84,7 @@ namespace WE05_oef3
                 Console.WriteLine();
             }
 
-            /* Alternatieve oplossing vooor group by met select in anoniem type */
+            /* Alternatieve oplossing voor group by met select in anoniem type */
             var anonGroups = from p in producten
                              group p by p.Categorie into cat
                              select new

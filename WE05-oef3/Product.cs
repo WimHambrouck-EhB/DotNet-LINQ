@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WE05_oef3
+﻿namespace WE05_oef3
 {
     class Product
     {
