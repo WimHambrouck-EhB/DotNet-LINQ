@@ -9,7 +9,7 @@
 
         public override string ToString()
         {
-            return $"Naam = {Naam}, ProductCode = {ProductCode}, Prijs = {Prijs}, Categorie = {Categorie}";
+            return $"Naam = {Naam}, ProductCode = {ProductCode}, Prijs = {Prijs:C}, Categorie = {Categorie}";
         }
     }
 }

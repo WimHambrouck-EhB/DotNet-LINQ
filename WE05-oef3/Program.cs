@@ -17,29 +17,24 @@ namespace WE05_oef3
             };
 
             MethodSyntax(producten);
+            DrawLine();
             QuerySyntax(producten);
         }
 
         private static void MethodSyntax(List<Product> producten)
         {
-            Console.WriteLine(producten.OrderByDescending(p => p.Prijs).First());
-            Console.WriteLine(producten.Average(p => p.Prijs));
+            // volgende query gaat er van uit dat er geen producten zijn met dezelfde prijs
+            var duurste = producten.OrderByDescending(p => p.Prijs).First();
 
-            var categoryGroups = producten.GroupBy(p => p.Categorie);
+            // als er wel twee of meer producten kunnen zijn met dezelfde, hoogste prijs,
+            // is deze query een betere oplossing (returnt alle producten met de hoogste prijs):
+            var duursten = producten.Where(p => p.Prijs == producten.Max(p => p.Prijs));
 
-            foreach (var group in categoryGroups)
-            {
-                Console.WriteLine(group.Key);
-                Console.WriteLine("Aantal: {0}", group.Count());
-                Console.WriteLine("Duurste: {0}", group.OrderByDescending(p => p.Prijs).First().Naam);
-                Console.WriteLine("Goedkoopste: {0}", group.OrderBy(p => p.Prijs).First().Naam);
-                Console.WriteLine("Gemiddele prijs: {0}", Math.Round(group.Average(p => p.Prijs), 2));
-                Console.WriteLine();
-            }
+            var gem = producten.Average(p => p.Prijs);
+            Console.WriteLine("Duurste product: " + duurste);
+            Console.WriteLine("Gemiddelde prijs producten: " + gem);
 
-
-            /* Alternatieve oplossing voor group by met select in anoniem type */
-            var anonGroups =
+            var productsByCategory =
                 producten.GroupBy(p => p.Categorie)
                 .Select(group => new
                 {
@@ -47,64 +42,70 @@ namespace WE05_oef3
                     Aantal = group.Count(),
                     Duurste = group.OrderByDescending(p => p.Prijs).First().Naam,
                     Goedkoopste = group.OrderBy(p => p.Prijs).First().Naam,
-                    GemPrijs = group.Average(p => p.Prijs)
+                    GemPrijs = group.Average(p => p.Prijs),
                 });
 
-            foreach (var anon in anonGroups)
+            foreach (var product in productsByCategory)
             {
-                Console.WriteLine(anon.CatNaam);
-                Console.WriteLine("Aantal: {0}", anon.Aantal);
-                Console.WriteLine("Duurste: {0}", anon.Duurste);
-                Console.WriteLine("Goedkoopste: {0}", anon.Goedkoopste);
-                Console.WriteLine("Gemiddele prijs: {0}", Math.Round(anon.GemPrijs, 2));
                 Console.WriteLine();
+                Console.WriteLine("-= " + product.CatNaam + " =-");
+                Console.WriteLine("Aantal: {0}", product.Aantal);
+                Console.WriteLine("Duurste: {0}", product.Duurste);
+                Console.WriteLine("Goedkoopste: {0}", product.Goedkoopste);
+                Console.WriteLine("Gemiddele prijs: {0}", Math.Round(product.GemPrijs, 2));
             }
 
         }
 
         private static void QuerySyntax(List<Product> producten)
         {
+            // volgende query gaat er van uit dat er geen producten zijn met dezelfde prijs
             var duurste = (from p in producten
-                           where p.Prijs == (from prod in producten orderby prod.Prijs descending select p.Prijs).Max()
+                           orderby p.Prijs descending
                            select p).First();
+
+            // als er wel twee of meer producten kunnen zijn met dezelfde, hoogste prijs,
+            // is deze query een betere oplossing (returnt alle producten met de hoogste prijs):
+            var duursten = from p in producten
+                           where p.Prijs == (from prod in producten select p.Prijs).Max()
+                           select p;
+
 
             var gem = (from p in producten
                        select p.Prijs).Average();
 
-            var categories = from p in producten
-                             group p by p.Categorie;
+            Console.WriteLine("Duurste product: " + duurste);
+            Console.WriteLine("Gemiddelde prijs producten: " + gem);
 
-            foreach (var cat in categories)
+            var productsByCategory = from p in producten
+                                     group p by p.Categorie into cat
+                                     select new
+                                     {
+                                         CatNaam = cat.Key,
+                                         Aantal = cat.Count(),
+                                         Duurste = (from p in cat orderby p.Prijs descending select p).First().Naam,
+                                         Goedkoopste = (from p in cat orderby p.Prijs select p).First().Naam,
+                                         GemPrijs = (from p in cat select p.Prijs).Average()
+                                     };
+
+            foreach (var product in productsByCategory)
             {
-                Console.WriteLine(cat.Key);
-                Console.WriteLine("Aantal: {0}", cat.Count());
-                Console.WriteLine("Duurste: {0}", (from p in cat orderby p.Prijs descending select p).First().Naam);
-                Console.WriteLine("Goedkoopste: {0}", (from p in cat orderby p.Prijs select p).First().Naam);
-                Console.WriteLine("Gemiddele prijs: {0}", Math.Round((from p in cat select p.Prijs).Average(), 2));
                 Console.WriteLine();
+                Console.WriteLine("-= " + product.CatNaam + " =-");
+                Console.WriteLine("Aantal: {0}", product.Aantal);
+                Console.WriteLine("Duurste: {0}", product.Duurste);
+                Console.WriteLine("Goedkoopste: {0}", product.Goedkoopste);
+                Console.WriteLine("Gemiddele prijs: {0}", Math.Round(product.GemPrijs, 2));
             }
+        }
 
-            /* Alternatieve oplossing voor group by met select in anoniem type */
-            var anonGroups = from p in producten
-                             group p by p.Categorie into cat
-                             select new
-                             {
-                                 CatNaam = cat.Key,
-                                 Aantal = cat.Count(),
-                                 Duurste = (from p in cat orderby p.Prijs descending select p).First().Naam,
-                                 Goedkoopste = (from p in cat orderby p.Prijs select p).First().Naam,
-                                 GemPrijs = (from p in cat select p.Prijs).Average()
-                             };
-
-            foreach (var anon in anonGroups)
+        private static void DrawLine()
+        {
+            for (int i = 0; i < Console.WindowWidth; i++)
             {
-                Console.WriteLine(anon.CatNaam);
-                Console.WriteLine("Aantal: {0}", anon.Aantal);
-                Console.WriteLine("Duurste: {0}", anon.Duurste);
-                Console.WriteLine("Goedkoopste: {0}", anon.Goedkoopste);
-                Console.WriteLine("Gemiddele prijs: {0}", Math.Round(anon.GemPrijs, 2));
-                Console.WriteLine();
+                Console.Write("-");
             }
+            Console.WriteLine();
         }
     }
 }
